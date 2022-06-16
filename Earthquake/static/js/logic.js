@@ -65,4 +65,34 @@ function createMap(earthquakes) {
     collapsed: false
   }).addTo(myMap);
 
+  var legend = L.control({ position: "bottomright" });
+  legend.onAdd = function() {
+    console.log("Legend", earthquakes);
+    var div = L.DomUtil.create("div", "info legend");
+    var limits = earthquakes._layers;
+    var colors = earthquakes._layers;
+    var labels = [];
+    console.log("Limits", limits);
+    // Add the minimum and maximum.
+    var legendInfo = 
+      "<div class=\"labels\">" +
+        "<div class=\"min\">" + limits[1].defaultOptions.fillColor + "</div>" +
+        "<div class=\"max\">" + limits[limits.length - 1].defaultOptions.fillColor  + "</div>" +
+      "</div>";
+
+    div.innerHTML = legendInfo;
+
+    limits.forEach(function(limit, index) {
+      labels.push("<li style=\"background-color: " + colors[index].options.color + "\"></li>");
+    });
+
+    div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+    return div;
+  };
+
+  // Adding the legend to the map
+  legend.addTo(myMap);
+
 }
+
+
