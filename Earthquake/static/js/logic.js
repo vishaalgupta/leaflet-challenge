@@ -9,8 +9,10 @@ function createFeatures(earthquakeData) {
 
   // Define a function that we want to run once for each feature in the features array.
   // Give each feature a popup that describes the place and time of the earthquake.
+  var depths = [];
   function onEachFeature(feature, layer) {
-    layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><p>${new Date(feature.properties.time)}</p>`);
+    layer.bindPopup(`<h3> Location: ${feature.properties.place}</h3><hr><p> Magnitude: ${feature.properties.mag}</p><hr><p> Depth: ${feature.geometry.coordinates[2]}</p>`);
+    //depth.push(feature.geometry.coordinates[2]);
   }
   console.log("Earthquake", earthquakeData);
   // Create a GeoJSON layer that contains the features array on the earthquakeData object.
@@ -19,7 +21,7 @@ function createFeatures(earthquakeData) {
     pointToLayer: function (feature, latlng) {
      return new L.circleMarker(latlng, {
        radius: feature.properties.mag,
-       fillColor: feature.geometry.coordinates[2],
+       fillColor: getColor(feature.geometry.coordinates[2]),
        weight: 1,
        opacity: 1,
        fillOpacity: 0.8
@@ -52,9 +54,9 @@ function createMap(earthquakes) {
   // Create our map, giving it the streetmap and earthquakes layers to display on load.
   var myMap = L.map("map", {
     center: [
-      37.09, -95.71
+      0, 0
     ],
-    zoom: 5,
+    zoom: 2,
     layers: [street, earthquakes]
   });
 
@@ -69,30 +71,41 @@ function createMap(earthquakes) {
   legend.onAdd = function() {
     console.log("Legend", earthquakes);
     var div = L.DomUtil.create("div", "info legend");
-    var limits = earthquakes._layers;
-    var colors = earthquakes._layers;
+    var depth = ["0-20", "20-50", "50-100", "100-300", "300+"];
+    var colors = ["#8AF783", "#4CEC40", "#ECEC40", "#EC7A40", "#EC4C40"];
     var labels = [];
-    console.log("Limits", limits);
-    // Add the minimum and maximum.
-    var legendInfo = 
-      "<div class=\"labels\">" +
-        "<div class=\"min\">" + limits[1].defaultOptions.fillColor + "</div>" +
-        "<div class=\"max\">" + limits[limits.length - 1].defaultOptions.fillColor  + "</div>" +
-      "</div>";
+    var legendInfo = "<h1>Depth</h1>"
 
     div.innerHTML = legendInfo;
 
-    limits.forEach(function(limit, index) {
-      labels.push("<li style=\"background-color: " + colors[index].options.color + "\"></li>");
+    colors.forEach(function(limit, index) {
+      labels.push("<ul style=\"background-color: " + colors[index]+ "\">" + depth[index] + "</ul>");
     });
 
     div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+    console.log("Inner HTML", div.innerHTML);
     return div;
   };
-
-  // Adding the legend to the map
   legend.addTo(myMap);
 
+}
+
+function getColor(depth) {
+  if (depth >= 0.00 && depth < 20 ) {
+    return '#8AF783';
+  }
+  else if (depth >= 20.00 && depth < 50) {
+    return '#4CEC40';
+  }
+  else if (depth >= 50.00 && depth < 100) {
+    return '#ECEC40';
+  }
+  else if (depth >= 100.00 && depth < 300) {
+    return '#EC7A40';
+  }
+  else {
+    return '#EC4C40';
+  }
 }
 
 
